@@ -11,29 +11,19 @@ import time
 import neopixel
 import micropython
 from config import *
-from ring_buffer import RingBuffer
 from utils import debug_print, timed_function
 from core_protected import *
 # 分配紧急异常缓冲区（防止中断中出现异常时无法打印信息）
 micropython.alloc_emergency_exception_buf(100)
 
-
-
-# 初始化核心组件
-ring_buffer = RingBuffer(RING_BUFFER_SIZE)
-isr_read_buf = bytearray(ISR_READ_BUF_SIZE)
-
-
 # ====================== 初始化组件 ======================
-# 初始化ADC（电池电压采集）
-adc = ADC(Pin(BATTERY_ADC_PIN))
+
 # 初始化电池电压采集定时器（100ms一次）
 battery_timer = Timer(-1)
 battery_timer.init(period=BATTERY_TIMER_PERIOD, mode=Timer.PERIODIC, callback=read_battery_adc)
 
 # 初始化UART接收和转发端口
 uart_recv = UART(0, baudrate=BAUDRATE, tx=Pin(0), rx=Pin(1), bits=8, parity=None, stop=1)
-uart_forward = UART(1, baudrate=BAUDRATE, tx=Pin(4), rx=Pin(5), bits=8, parity=None, stop=1)
 # 配置UART空闲中断（接收完成后触发）
 uart_recv.irq(handler=uart_idle_callback, trigger=UART.IRQ_RXIDLE, hard=False)
 

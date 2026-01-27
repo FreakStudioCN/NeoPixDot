@@ -4,11 +4,20 @@ from config import *
 from utils import debug_print, timed_function
 from ring_buffer import RingBuffer
 import time
+import micropython
+from ring_buffer import RingBuffer
+# 初始化核心组件
+ring_buffer = RingBuffer(RING_BUFFER_SIZE)
 
 # 初始化看门狗（Watch Dog Timer）
 # 超时时间设置为5000ms（5秒），若超过5秒未喂狗则自动重启设备
 wdt = WDT(timeout=WDT_TIMEOUT)
 np = neopixel.NeoPixel(Pin(WS2812_PIN), WS2812_NUM)
+# 初始化ADC（电池电压采集）
+adc = ADC(Pin(BATTERY_ADC_PIN))
+isr_read_buf = bytearray(ISR_READ_BUF_SIZE)
+uart_forward = UART(1, baudrate=BAUDRATE, tx=Pin(4), rx=Pin(5), bits=8, parity=None, stop=1)
+
 @timed_function
 def set_ws2812_color(r, g, b):
     for i in range(WS2812_NUM):
@@ -181,9 +190,6 @@ def process_received_data(_):
 # ====================== ISR中断回调 ======================
 def uart_idle_callback(uart):
     global is_scheduled, isr_read_buf, ring_buffer
-
-    if uart is not uart_recv:
-        return
 
     read_len = uart.readinto(isr_read_buf)
     if read_len == 0:
