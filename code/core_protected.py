@@ -1,3 +1,18 @@
+# Python env   : MicroPython v1.27
+# -*- coding: utf-8 -*-
+# @Time    : 2025/9/5 下午10:12
+# @Author  : 李清水
+# @File    : core_protected.py
+# @Description : 核心功能
+# @License : CC BY-NC 4.0
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.27"
+
+# ======================================== 导入相关模块 =========================================
+
 import neopixel
 from machine import UART, Pin, disable_irq, enable_irq, ADC, Timer, WDT
 from config import *
@@ -6,17 +21,10 @@ from ring_buffer import RingBuffer
 import time
 import micropython
 from ring_buffer import RingBuffer
-# 初始化核心组件
-ring_buffer = RingBuffer(RING_BUFFER_SIZE)
 
-# 初始化看门狗（Watch Dog Timer）
-# 超时时间设置为5000ms（5秒），若超过5秒未喂狗则自动重启设备
-wdt = WDT(timeout=WDT_TIMEOUT)
-np = neopixel.NeoPixel(Pin(WS2812_PIN), WS2812_NUM)
-# 初始化ADC（电池电压采集）
-adc = ADC(Pin(BATTERY_ADC_PIN))
-isr_read_buf = bytearray(ISR_READ_BUF_SIZE)
-uart_forward = UART(1, baudrate=BAUDRATE, tx=Pin(4), rx=Pin(5), bits=8, parity=None, stop=1)
+# ======================================== 全局变量 ============================================
+
+# ======================================== 功能函数 ============================================
 
 @timed_function
 def set_ws2812_color(r, g, b):
@@ -206,3 +214,21 @@ def uart_idle_callback(uart):
         except RuntimeError as e:
             debug_print("⚠️ Schedule queue full: %s" % str(e))
             is_scheduled = False
+
+# ======================================== 自定义类 ============================================
+
+# ======================================== 初始化配置 ==========================================
+
+# 初始化核心组件
+ring_buffer = RingBuffer(RING_BUFFER_SIZE)
+
+# 初始化看门狗（Watch Dog Timer）
+# 超时时间设置为5000ms（5秒），若超过5秒未喂狗则自动重启设备
+wdt = WDT(timeout=WDT_TIMEOUT)
+np = neopixel.NeoPixel(Pin(WS2812_PIN), WS2812_NUM)
+# 初始化ADC（电池电压采集）
+adc = ADC(Pin(BATTERY_ADC_PIN))
+isr_read_buf = bytearray(ISR_READ_BUF_SIZE)
+uart_forward = UART(1, baudrate=BAUDRATE, tx=Pin(4), rx=Pin(5), bits=8, parity=None, stop=1)
+
+# ========================================  主程序  ===========================================

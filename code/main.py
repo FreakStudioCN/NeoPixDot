@@ -1,10 +1,17 @@
-# Python env   : MicroPython v1.27.0
+# Python env   : MicroPython v1.27
 # -*- coding: utf-8 -*-
 # @Time    : 2026/1/27 上午10:51
 # @Author  : 李清水
 # @File    : main.py
 # @Description : 实现 UART 解析 RGB 控制 WS2812 并转发数据，
 #                ADC 滑动滤波监测电池电压（低电告警禁 UART 控灯），集成 WDT 防卡死，通过环形缓冲区、中断调度保障运行稳定。
+
+__version__ = "0.1.0"
+__author__ = "李清水"
+__license__ = "CC BY-NC 4.0"
+__platform__ = "MicroPython v1.27"
+
+# ======================================== 导入相关模块 =========================================
 
 from machine import UART, Pin, disable_irq, enable_irq, ADC, Timer, WDT  # 导入看门狗(WDT)模块
 import time
@@ -14,9 +21,17 @@ from config import *
 from utils import debug_print, timed_function
 from core_protected import *
 # 分配紧急异常缓冲区（防止中断中出现异常时无法打印信息）
-micropython.alloc_emergency_exception_buf(100)
 
-# ====================== 初始化组件 ======================
+# ======================================== 全局变量 ============================================
+
+# ======================================== 功能函数 ============================================
+
+
+# ======================================== 自定义类 ============================================
+
+# ======================================== 初始化配置 ==========================================
+
+micropython.alloc_emergency_exception_buf(100)
 
 # 初始化电池电压采集定时器（100ms一次）
 battery_timer = Timer(-1)
@@ -26,8 +41,6 @@ battery_timer.init(period=BATTERY_TIMER_PERIOD, mode=Timer.PERIODIC, callback=re
 uart_recv = UART(0, baudrate=BAUDRATE, tx=Pin(0), rx=Pin(1), bits=8, parity=None, stop=1)
 # 配置UART空闲中断（接收完成后触发）
 uart_recv.irq(handler=uart_idle_callback, trigger=UART.IRQ_RXIDLE, hard=False)
-
-
 debug_print("✅ WDT initialized with timeout: %d seconds" % (WDT_TIMEOUT / 1000))
 
 # 初始化喂狗软件定时器（1秒周期自动喂狗）
@@ -35,7 +48,8 @@ wdt_feed_timer = Timer(-1)
 wdt_feed_timer.init(period=WDT_FEED_PERIOD, mode=Timer.PERIODIC, callback=wdt_feed_callback)
 debug_print("✅ WDT feed timer initialized with period: %d seconds" % (WDT_FEED_PERIOD / 1000))
 
-# ====================== 主程序入口 ======================
+# ========================================  主程序  ===========================================
+
 if __name__ == "__main__":
     debug_print("=== UART+WS2812+Battery Monitor ===")
     debug_print("UART Baudrate: %d" % BAUDRATE)
