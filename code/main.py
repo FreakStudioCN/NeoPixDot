@@ -6,31 +6,25 @@
 # @Description : 实现 UART 解析 RGB 控制 WS2812 并转发数据，
 #                ADC 滑动滤波监测电池电压（低电告警禁 UART 控灯），集成 WDT 防卡死，通过环形缓冲区、中断调度保障运行稳定。
 
-__version__ = "0.1.0"
-__author__ = "李清水"
-__license__ = "CC BY-NC 4.0"
-__platform__ = "MicroPython v1.27"
-
 # ======================================== 导入相关模块 =========================================
 
-from machine import UART, Pin, disable_irq, enable_irq, ADC, Timer, WDT  # 导入看门狗(WDT)模块
+from machine import UART, Pin, disable_irq, enable_irq, ADC, Timer, WDT
 import time
 import neopixel
 import micropython
 from config import *
 from utils import debug_print, timed_function
 from core_protected import *
-# 分配紧急异常缓冲区（防止中断中出现异常时无法打印信息）
 
 # ======================================== 全局变量 ============================================
 
 # ======================================== 功能函数 ============================================
 
-
 # ======================================== 自定义类 ============================================
 
 # ======================================== 初始化配置 ==========================================
 
+# 分配紧急异常缓冲区（防止中断中出现异常时无法打印信息）
 micropython.alloc_emergency_exception_buf(100)
 
 # 初始化电池电压采集定时器（100ms一次）

@@ -33,7 +33,6 @@ def set_ws2812_color(r, g, b):
     np.write()
     debug_print("WS2812 updated: 16 LEDs set to (R:%d, G:%d, B:%d)" % (r, g, b))
 
-
 # HSV转RGB（颜色空间转换）
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
@@ -56,7 +55,6 @@ def hsv_to_rgb(h, s, v):
         r, g, b = v, p, q
     return (int(r * 255), int(g * 255), int(b * 255))
 
-
 # 彩虹流动效果（新增：关键长操作前手动喂狗）
 def rainbow_flow():
     debug_print("=== Rainbow Flow Start (Times: %d, Duration: %dms) ===" % (RAINBOW_LOOP_TIMES, RAINBOW_TOTAL_DURATION))
@@ -76,7 +74,6 @@ def rainbow_flow():
     wdt.feed()
     set_ws2812_color(0, 0, 0)
     debug_print("=== Rainbow Flow End ===")
-
 
 # 上电电压检测（初始化时采集多次取平均，提高准确性）
 def power_on_battery_check():
@@ -99,7 +96,6 @@ def power_on_battery_check():
     battery_voltage_window = [avg_voltage] * WINDOW_SIZE
     return avg_voltage
 
-
 # ====================== 电池电压读取&滑动滤波函数 ======================
 def read_battery_adc(timer):
     global battery_voltage, battery_voltage_window
@@ -113,7 +109,6 @@ def read_battery_adc(timer):
     if len(battery_voltage_window) > WINDOW_SIZE:
         battery_voltage_window.pop(0)  # 移除最旧的数值
 
-
 # 计算滑动窗口的平均电压（防抖核心）
 def get_battery_avg_voltage():
     if not battery_voltage_window:
@@ -121,14 +116,12 @@ def get_battery_avg_voltage():
     avg_volt = round(sum(battery_voltage_window) / len(battery_voltage_window), 2)
     return avg_volt
 
-
 # ====================== 看门狗打印调度函数 ======================
 def wdt_feed_print(_):
     """看门狗喂狗打印的调度执行函数（非中断上下文）"""
     global wdt_print_scheduled
     debug_print("🐶 WDT fed (timer callback)")
     wdt_print_scheduled = False  # 执行完成后重置标志位
-
 
 # ====================== 看门狗喂狗回调函数（软件定时器触发） ======================
 def wdt_feed_callback(timer):
@@ -149,7 +142,6 @@ def wdt_feed_callback(timer):
             debug_print("⚠️ WDT print schedule queue full: %s" % str(e))
             wdt_print_scheduled = False
 
-
 # ====================== UART数据处理函数 ======================
 @timed_function
 def parse_rgb_data(data):
@@ -160,7 +152,6 @@ def parse_rgb_data(data):
     else:
         debug_print("Insufficient data (%d bytes), cannot parse RGB" % len(data))
         return None
-
 
 @timed_function
 def forward_remaining_data(data):
@@ -173,7 +164,6 @@ def forward_remaining_data(data):
             debug_print("No remaining data to forward")
     else:
         debug_print("No data to forward (total bytes: %d)" % len(data))
-
 
 @timed_function
 def process_received_data(_):
@@ -194,8 +184,8 @@ def process_received_data(_):
         set_ws2812_color(*rgb_values)
     forward_remaining_data(data)
 
-
 # ====================== ISR中断回调 ======================
+
 def uart_idle_callback(uart):
     global is_scheduled, isr_read_buf, ring_buffer
 
